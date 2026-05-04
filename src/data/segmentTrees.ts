@@ -1,0 +1,110 @@
+import type { Topic } from '@/types/problems'
+
+export const segmentTreesTopic: Topic = {
+  id: 'segment-trees',
+  name: 'Segment Trees',
+  icon: 'pi-objects-column',
+  description: 'Range queries, lazy propagation, and advanced tree structures',
+  interviewPhases: [
+    {
+      name: 'Phase 1: Range Query Foundations',
+      description: 'Build and query segment trees for sum, min, and max over ranges.',
+      problems: [
+        { id: 'st-i-1', name: 'Range Sum Query - Immutable', url: 'https://leetcode.com/problems/range-sum-query-immutable/' },
+        { id: 'st-i-2', name: 'Range Sum Query - Mutable', url: 'https://leetcode.com/problems/range-sum-query-mutable/' },
+        { id: 'st-i-3', name: 'Range Minimum Query', url: 'https://leetcode.com/problems/range-minimum-query/' },
+        { id: 'st-i-4', name: 'My Calendar I', url: 'https://leetcode.com/problems/my-calendar-i/' },
+        { id: 'st-i-5', name: 'My Calendar II', url: 'https://leetcode.com/problems/my-calendar-ii/' },
+        { id: 'st-i-6', name: 'My Calendar III', url: 'https://leetcode.com/problems/my-calendar-iii/' },
+      ],
+    },
+    {
+      name: 'Phase 2: Coordinate Compression & Intervals',
+      description: 'Segment trees with coordinate compression for sparse value ranges.',
+      problems: [
+        { id: 'st-i-7', name: 'The Skyline Problem', url: 'https://leetcode.com/problems/the-skyline-problem/' },
+        { id: 'st-i-8', name: 'Falling Squares', url: 'https://leetcode.com/problems/falling-squares/' },
+        { id: 'st-i-9', name: 'Range Module', url: 'https://leetcode.com/problems/range-module/' },
+        { id: 'st-i-10', name: 'Rectangle Area II', url: 'https://leetcode.com/problems/rectangle-area-ii/' },
+        { id: 'st-i-11', name: 'Count of Smaller Numbers After Self', url: 'https://leetcode.com/problems/count-of-smaller-numbers-after-self/' },
+        { id: 'st-i-12', name: 'Reverse Pairs', url: 'https://leetcode.com/problems/reverse-pairs/' },
+      ],
+    },
+    {
+      name: 'Phase 3: Advanced Applications',
+      description: 'Segment trees combined with DP, lazy propagation, and complex queries.',
+      problems: [
+        { id: 'st-i-13', name: 'Count of Range Sum', url: 'https://leetcode.com/problems/count-of-range-sum/' },
+        { id: 'st-i-14', name: 'Number of Longest Increasing Subsequence', url: 'https://leetcode.com/problems/number-of-longest-increasing-subsequence/' },
+        { id: 'st-i-15', name: 'Booking Concert Tickets in Groups', url: 'https://leetcode.com/problems/booking-concert-tickets-in-groups/' },
+        { id: 'st-i-16', name: 'Longest Increasing Subsequence II', url: 'https://leetcode.com/problems/longest-increasing-subsequence-ii/' },
+        { id: 'st-i-17', name: 'Maximum Sum Queries', url: 'https://leetcode.com/problems/maximum-sum-queries/' },
+        { id: 'st-i-18', name: 'Handling Sum Queries After Update', url: 'https://leetcode.com/problems/handling-sum-queries-after-update/' },
+      ],
+    },
+  ],
+  cpPhases: [
+    {
+      name: 'CSES - Range Queries',
+      description: 'Essential range query problems from CSES. Cover all core segment tree operations.',
+      problems: [
+        { id: 'st-cp-1', name: 'Static Range Sum Queries', url: 'https://cses.fi/problemset/task/1646' },
+        { id: 'st-cp-2', name: 'Static Range Minimum Queries', url: 'https://cses.fi/problemset/task/1647' },
+        { id: 'st-cp-3', name: 'Dynamic Range Sum Queries', url: 'https://cses.fi/problemset/task/1648' },
+        { id: 'st-cp-4', name: 'Dynamic Range Minimum Queries', url: 'https://cses.fi/problemset/task/1649' },
+        { id: 'st-cp-5', name: 'Range Xor Queries', url: 'https://cses.fi/problemset/task/1650' },
+        { id: 'st-cp-6', name: 'Range Update Queries', url: 'https://cses.fi/problemset/task/1651' },
+        { id: 'st-cp-7', name: 'Forest Queries', url: 'https://cses.fi/problemset/task/1652' },
+        { id: 'st-cp-8', name: 'Hotel Queries', url: 'https://cses.fi/problemset/task/1191' },
+        { id: 'st-cp-9', name: 'List Removals', url: 'https://cses.fi/problemset/task/1749' },
+        { id: 'st-cp-10', name: 'Salary Queries', url: 'https://cses.fi/problemset/task/1144' },
+        { id: 'st-cp-11', name: 'Prefix Sum Queries', url: 'https://cses.fi/problemset/task/2166' },
+        { id: 'st-cp-12', name: 'Pizzeria Queries', url: 'https://cses.fi/problemset/task/2206' },
+      ],
+    },
+    {
+      name: 'Codeforces - Segment Tree Problems',
+      description: 'Codeforces problems requiring segment tree with lazy propagation and advanced variants.',
+      problems: [
+        { id: 'st-cp-13', name: 'Nested Segments', url: 'https://codeforces.com/problemset/problem/652/D' },
+        { id: 'st-cp-14', name: 'Ants', url: 'https://codeforces.com/problemset/problem/704/D' },
+        { id: 'st-cp-15', name: 'Iahub and Permutations', url: 'https://codeforces.com/problemset/problem/449/D' },
+        { id: 'st-cp-16', name: 'Sereja and Brackets', url: 'https://codeforces.com/problemset/problem/380/C' },
+        { id: 'st-cp-17', name: 'Circular RMQ', url: 'https://codeforces.com/problemset/problem/52/C' },
+        { id: 'st-cp-18', name: 'A Segment of Lamps', url: 'https://codeforces.com/problemset/problem/614/A' },
+      ],
+    },
+  ],
+  resources: [
+    { name: 'William Fiset - Segment Trees', description: 'Best video resource for segment trees. Covers construction, queries, updates, and lazy propagation clearly.', type: 'video', category: 'both', url: 'https://www.youtube.com/@WilliamFiset-videos' },
+    { name: 'Errichto - Segment Trees', description: 'Advanced segment tree techniques for competitive programming including merge sort trees and persistent segment trees.', type: 'video', category: 'cp', url: 'https://www.youtube.com/@Errichto' },
+    { name: 'CP-Algorithms - Segment Tree', description: 'Comprehensive reference with implementations for sum, min, lazy propagation, and advanced variants.', type: 'written', category: 'both', url: 'https://cp-algorithms.com/data_structures/segment_tree.html' },
+    { name: 'USACO Guide - Segment Trees', description: 'Structured learning path from basic queries to lazy propagation with USACO-focused problems.', type: 'written', category: 'cp', url: 'https://usaco.guide/gold/segtree-intro' },
+    { name: 'Codeforces - Segment Tree Blog', description: 'Legendary Codeforces blog covering all segment tree variants used in contests.', type: 'written', category: 'cp', url: 'https://codeforces.com/blog/entry/18051' },
+    { name: 'LeetCode - Segment Tree Tag', description: 'All LeetCode problems tagged with Segment Tree.', type: 'written', category: 'interview', url: 'https://leetcode.com/tag/segment-tree/' },
+  ],
+  interviewTimeline: [
+    { title: 'Week 1: Build & Query', description: 'Implement segment tree from scratch for sum and min queries. Solve Phase 1 problems (6 problems).' },
+    { title: 'Week 2: Coordinate Compression', description: 'Learn coordinate compression for sparse values. Solve Phase 2 problems (6 problems) using compressed segment trees.' },
+    { title: 'Week 3: Lazy Propagation & Advanced', description: 'Master lazy propagation for range updates. Solve Phase 3 problems (6 problems).' },
+  ],
+  cpTimeline: [
+    { title: 'Week 1-2: CSES Range Queries', description: 'Complete all 12 CSES range query problems. Implement iterative and recursive segment trees with lazy propagation.' },
+    { title: 'Week 3-4: Codeforces Practice', description: 'Solve CF 1400-1800 rated segment tree problems. Learn merge sort trees, persistent segment trees, and 2D segment trees.' },
+    { title: 'Month 2: Advanced Variants', description: 'Study persistent segment trees, segment trees with sets, and HLD + segment tree combinations. Target CF 1800+ problems.' },
+  ],
+  studyApproach: {
+    interview: 'Start by implementing a basic sum segment tree from scratch. Then add point updates. Then add range updates with lazy propagation. For LeetCode, coordinate compression is often needed — practice reducing arbitrary value ranges to small indices.',
+    cp: 'Build a template for iterative segment tree (faster than recursive). Learn lazy propagation thoroughly — it unlocks range update problems. Study merge sort trees for "count of elements satisfying condition in range" queries. Persistent segment trees are needed for "queries on historical versions" problems.',
+  },
+  patternsSummary: [
+    'Point Update Range Query - Update single element, query range sum/min/max',
+    'Range Update Point Query - Difference array via segment tree',
+    'Range Update Range Query - Lazy propagation for bulk updates',
+    'Coordinate Compression - Map sparse values to dense index range',
+    'Merge Sort Tree - Answer "count in range" queries offline',
+    'Persistent Segment Tree - Version history, k-th element queries',
+    'Segment Tree Beats - Complex range updates (e.g. range chmin/chmax)',
+    '2D Segment Tree - Range queries on 2D grids',
+  ],
+}
