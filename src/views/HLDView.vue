@@ -1,190 +1,481 @@
 <script setup lang="ts">
-import Accordion from 'primevue/accordion'
-import AccordionPanel from 'primevue/accordionpanel'
-import AccordionHeader from 'primevue/accordionheader'
-import AccordionContent from 'primevue/accordioncontent'
-import Card from 'primevue/card'
-import Tag from 'primevue/tag'
+import { ref, computed, onMounted } from 'vue'
+import { RouterLink, useRouter } from 'vue-router'
+import { hldTopics as newTopics } from '@/data/hld'
+import { hldTopics as legacyTopicsRaw } from '@/data/hldTopics'
+import { useHldProgressStore } from '@/stores/useHldProgressStore'
 
-const concepts = [
-  {
-    name: 'Scalability',
-    topics: [
-      'Horizontal vs Vertical Scaling',
-      'Load Balancing (Round Robin, Least Connections, Consistent Hashing)',
-      'Database Sharding (Range, Hash, Directory-based)',
-      'Read Replicas & Write-ahead Logs',
-      'CDN & Edge Caching',
-      'Auto-scaling strategies',
-    ],
-  },
-  {
-    name: 'Databases',
-    topics: [
-      'SQL vs NoSQL trade-offs',
-      'CAP Theorem (Consistency, Availability, Partition Tolerance)',
-      'ACID vs BASE',
-      'Indexing strategies (B-Tree, Hash, Composite)',
-      'Database replication (Master-Slave, Multi-Master)',
-      'Partitioning vs Sharding',
-    ],
-  },
-  {
-    name: 'Caching',
-    topics: [
-      'Cache-aside, Write-through, Write-behind patterns',
-      'Redis vs Memcached',
-      'Cache invalidation strategies (TTL, LRU, LFU)',
-      'Distributed caching',
-      'Cache stampede prevention',
-      'Multi-tier caching (L1 local, L2 distributed)',
-    ],
-  },
-  {
-    name: 'Messaging & Async',
-    topics: [
-      'Message Queues (Kafka, RabbitMQ, SQS)',
-      'Pub/Sub vs Point-to-Point',
-      'Event-driven architecture',
-      'Exactly-once vs At-least-once delivery',
-      'Dead letter queues',
-      'Backpressure handling',
-    ],
-  },
-  {
-    name: 'Networking & Protocols',
-    topics: [
-      'REST vs gRPC vs GraphQL',
-      'WebSockets vs Server-Sent Events vs Long Polling',
-      'DNS resolution & routing',
-      'API Gateway patterns',
-      'Rate Limiting (Token Bucket, Leaky Bucket)',
-      'Circuit Breaker pattern',
-    ],
-  },
-  {
-    name: 'Storage',
-    topics: [
-      'Block vs Object vs File storage',
-      'S3 / Blob storage patterns',
-      'Data lake vs Data warehouse',
-      'Write-ahead logging',
-      'LSM Trees vs B-Trees',
-      'Compression strategies',
-    ],
-  },
-]
+interface CardTopic {
+  slug: string
+  title: string
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced'
+  icon: string
+  color: string
+  summary: string
+  tags: string[]
+  hasSimulator: boolean
+}
 
-const designs = [
-  { name: 'Design URL Shortener (TinyURL)', difficulty: 'Easy', concepts: ['Hashing', 'Base62', 'Database', 'Caching'] },
-  { name: 'Design Rate Limiter', difficulty: 'Easy', concepts: ['Token Bucket', 'Sliding Window', 'Redis'] },
-  { name: 'Design Twitter/X Feed', difficulty: 'Medium', concepts: ['Fan-out', 'Caching', 'Timeline Service', 'Pub/Sub'] },
-  { name: 'Design Instagram/Photo Sharing', difficulty: 'Medium', concepts: ['CDN', 'Object Storage', 'Feed Generation', 'Sharding'] },
-  { name: 'Design Chat System (WhatsApp)', difficulty: 'Medium', concepts: ['WebSockets', 'Message Queue', 'Presence', 'E2E Encryption'] },
-  { name: 'Design YouTube/Video Streaming', difficulty: 'Hard', concepts: ['CDN', 'Transcoding', 'Adaptive Bitrate', 'Storage'] },
-  { name: 'Design Google Search', difficulty: 'Hard', concepts: ['Web Crawling', 'Inverted Index', 'PageRank', 'Distributed Systems'] },
-  { name: 'Design Uber/Ride Sharing', difficulty: 'Hard', concepts: ['Geospatial Index', 'Matching', 'Real-time Tracking', 'Pricing'] },
-  { name: 'Design Notification System', difficulty: 'Medium', concepts: ['Push/Pull', 'Priority Queue', 'Rate Limiting', 'Templates'] },
-  { name: 'Design Distributed Cache', difficulty: 'Hard', concepts: ['Consistent Hashing', 'Replication', 'Eviction', 'Gossip Protocol'] },
-]
+const router = useRouter()
+const progressStore = useHldProgressStore()
 
-const framework = [
-  { step: '1', title: 'Requirements Gathering', desc: 'Clarify functional & non-functional requirements. Ask about scale, latency, consistency.' },
-  { step: '2', title: 'Capacity Estimation', desc: 'Estimate QPS, storage, bandwidth. Back-of-envelope calculations.' },
-  { step: '3', title: 'High-Level Architecture', desc: 'Draw the main components: clients, servers, databases, caches, queues.' },
-  { step: '4', title: 'Detailed Design', desc: 'Dive into specific components. Discuss APIs, data models, algorithms.' },
-  { step: '5', title: 'Identify Bottlenecks', desc: 'Address single points of failure, scalability limits, and monitoring.' },
-]
+onMounted(() => {
+  progressStore.load()
+})
+
+const allTopics = computed<CardTopic[]>(() => {
+  const newSlugs = new Set(newTopics.map((t) => t.slug))
+  const migrated = newTopics.map((t) => ({
+    slug: t.slug,
+    title: t.title,
+    difficulty: t.difficulty,
+    icon: t.icon,
+    color: t.color,
+    summary: t.summary,
+    tags: t.topics,
+    hasSimulator: Boolean(t.simulator),
+  }))
+  const legacy = legacyTopicsRaw
+    .filter((t) => !newSlugs.has(t.slug))
+    .map((t) => ({
+      slug: t.slug,
+      title: t.title,
+      difficulty: t.difficulty,
+      icon: t.icon,
+      color: t.color,
+      summary: t.summary,
+      tags: t.concepts,
+      hasSimulator: Boolean(t.simulator),
+    }))
+  return [...migrated, ...legacy]
+})
+
+const DIFFICULTIES: Array<'Beginner' | 'Intermediate' | 'Advanced'> = ['Beginner', 'Intermediate', 'Advanced']
+const FILTER_OPTIONS = ['All', ...DIFFICULTIES] as const
+type Filter = (typeof FILTER_OPTIONS)[number]
+
+const activeFilter = ref<Filter>('All')
+
+const grouped = computed(() => {
+  const filtered =
+    activeFilter.value === 'All'
+      ? allTopics.value
+      : allTopics.value.filter((t) => t.difficulty === activeFilter.value)
+  return DIFFICULTIES.map((d) => ({ difficulty: d, topics: filtered.filter((t) => t.difficulty === d) })).filter(
+    (g) => g.topics.length,
+  )
+})
+
+const progressPercent = computed(() =>
+  allTopics.value.length > 0 ? Math.round((progressStore.completedCount / allTopics.value.length) * 100) : 0,
+)
+
+function openSimulate(slug: string) {
+  router.push(`/hld/${slug}/simulate`)
+}
+
+function openDraw(slug: string) {
+  router.push(`/draw?d=${slug}`)
+}
 </script>
 
 <template>
-  <div>
-    <div class="section-header">
-      <h1><i class="pi pi-globe"></i> High Level Design (HLD)</h1>
-      <p>System design for large-scale distributed systems</p>
+  <div class="hld-page">
+    <header class="hld-hero">
+      <p class="sc-badge-line">System design for large-scale distributed systems</p>
+      <h1 class="hld-title">High Level Design</h1>
+      <p class="hld-subtitle">
+        Distributed architectures with diagrams, technology trade-offs, and deep dives — from
+        rate limiters and URL shorteners to ride-sharing and video streaming platforms.
+      </p>
+      <p class="hld-total">{{ allTopics.length }} designs across 3 difficulty levels</p>
+    </header>
+
+    <div class="progress-strip">
+      <div class="progress-inner">
+        <span class="progress-label">{{ progressStore.completedCount }}/{{ allTopics.length }} completed</span>
+        <div class="progress-bar-track">
+          <div class="progress-bar-fill" :style="{ width: progressPercent + '%' }"></div>
+        </div>
+      </div>
     </div>
 
-    <h2 style="margin-bottom: 1rem">Interview Framework</h2>
-    <div class="framework-steps">
-      <Card v-for="step in framework" :key="step.step" class="step-card">
-        <template #title>
-          <span class="step-number">{{ step.step }}</span> {{ step.title }}
-        </template>
-        <template #content>
-          <p>{{ step.desc }}</p>
-        </template>
-      </Card>
+    <div class="filter-tabs">
+      <button
+        v-for="f in FILTER_OPTIONS"
+        :key="f"
+        class="filter-tab"
+        :class="{ active: activeFilter === f }"
+        @click="activeFilter = f"
+      >
+        {{ f }}
+      </button>
     </div>
 
-    <h2 style="margin: 2rem 0 1rem">Core Concepts</h2>
-    <Accordion multiple>
-      <AccordionPanel v-for="(concept, i) in concepts" :key="i" :value="String(i)">
-        <AccordionHeader>{{ concept.name }}</AccordionHeader>
-        <AccordionContent>
-          <ul class="concept-list">
-            <li v-for="t in concept.topics" :key="t">{{ t }}</li>
-          </ul>
-        </AccordionContent>
-      </AccordionPanel>
-    </Accordion>
-
-    <h2 style="margin: 2rem 0 1rem">Must-Practice Design Problems</h2>
-    <div class="design-problems">
-      <Card v-for="d in designs" :key="d.name" class="problem-card">
-        <template #title>
-          {{ d.name }}
-          <Tag
-            :value="d.difficulty"
-            :severity="d.difficulty === 'Hard' ? 'danger' : d.difficulty === 'Medium' ? 'warn' : 'success'"
-            style="margin-left: 0.5rem; vertical-align: middle"
-          />
-        </template>
-        <template #content>
-          <div class="concept-tags">
-            <Tag v-for="c in d.concepts" :key="c" :value="c" severity="info" rounded style="margin: 0.25rem" />
+    <section v-for="g in grouped" :key="g.difficulty" class="difficulty-group">
+      <h2 class="group-heading">
+        {{ g.difficulty }}
+        <span class="group-count">{{ g.topics.length }}</span>
+      </h2>
+      <div class="cards-grid">
+        <div v-for="topic in g.topics" :key="topic.slug" class="sc-card sc-card-hoverable topic-card">
+          <div class="card-top">
+            <span class="sc-tag" :class="`difficulty-${topic.difficulty.toLowerCase()}`">{{
+              topic.difficulty
+            }}</span>
+            <div class="card-top-actions">
+              <button
+                v-if="topic.hasSimulator"
+                type="button"
+                class="action-chip sim-chip"
+                title="Build and stress-test this design in the simulator"
+                @click.stop="openSimulate(topic.slug)"
+              >
+                <i class="pi pi-play"></i> Simulate
+              </button>
+              <button
+                type="button"
+                class="action-chip draw-chip"
+                title="Practice this design on the whiteboard"
+                @click.stop="openDraw(topic.slug)"
+              >
+                <i class="pi pi-pencil"></i> Draw
+              </button>
+              <label
+                class="topic-checkbox"
+                :title="progressStore.isCompleted(topic.slug) ? 'Mark as not completed' : 'Mark as completed'"
+              >
+                <input
+                  type="checkbox"
+                  :checked="progressStore.isCompleted(topic.slug)"
+                  @click.stop
+                  @change="progressStore.toggleCompleted(topic.slug)"
+                />
+                <span class="checkbox-mark"></span>
+              </label>
+            </div>
           </div>
-        </template>
-      </Card>
-    </div>
+
+          <RouterLink :to="`/hld/${topic.slug}`" class="card-link">
+            <div class="card-icon-chip" :style="{ background: topic.color }">
+              <i :class="topic.icon"></i>
+            </div>
+            <h3 class="card-title">{{ topic.title }}</h3>
+            <p class="card-summary">{{ topic.summary }}</p>
+            <div class="card-tags">
+              <span v-for="c in topic.tags.slice(0, 3)" :key="c" class="sc-tag">{{ c }}</span>
+            </div>
+          </RouterLink>
+        </div>
+      </div>
+    </section>
   </div>
 </template>
 
 <style scoped>
-.framework-steps {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1rem;
+.hld-page {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
 }
 
-.step-number {
+.hld-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--sc-border);
+}
+
+.hld-title {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--sc-text);
+}
+
+.hld-subtitle {
+  color: var(--sc-text-muted);
+  font-size: 1rem;
+  line-height: 1.6;
+  max-width: 700px;
+}
+
+.hld-total {
+  color: var(--sc-text-muted);
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+
+.progress-strip {
+  background: var(--sc-surface);
+  border: 1px solid var(--sc-border);
+  border-radius: var(--sc-radius-md);
+  padding: 1rem 1.25rem;
+}
+
+.progress-inner {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.progress-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--sc-text);
+}
+
+.progress-bar-track {
+  height: 8px;
+  border-radius: var(--sc-radius-full);
+  background: var(--sc-surface-2);
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--sc-gradient-primary);
+  border-radius: var(--sc-radius-full);
+  transition: width 0.3s ease;
+}
+
+.filter-tabs {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+.filter-tab {
+  font-family: var(--sc-font);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 0.5rem 1.1rem;
+  border-radius: var(--sc-radius-sm);
+  border: 1px solid var(--sc-border);
+  background: transparent;
+  color: var(--sc-text-muted);
+  cursor: pointer;
+  transition:
+    border-color 0.15s ease,
+    color 0.15s ease,
+    background 0.15s ease;
+}
+
+.filter-tab:hover {
+  border-color: var(--sc-accent-tag-border);
+  color: var(--sc-text);
+}
+
+.filter-tab.active {
+  background: var(--sc-accent-tag-bg);
+  border-color: var(--sc-accent-tag-border);
+  color: var(--sc-accent-tag-text);
+}
+
+.difficulty-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.group-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--sc-text);
+}
+
+.group-count {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
-  border-radius: 50%;
-  background: var(--p-primary-color);
-  color: white;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: var(--sc-accent-tag-bg);
+  border: 1px solid var(--sc-accent-tag-border);
+  color: var(--sc-accent-tag-text);
+  font-size: 0.75rem;
   font-weight: 700;
-  font-size: 0.85rem;
-  margin-right: 0.5rem;
 }
 
-.concept-list {
-  padding-left: 1.5rem;
-  line-height: 2;
-}
-
-.design-problems {
+.cards-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
 }
 
-.concept-tags {
+.topic-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  padding: 1.5rem;
+  transition:
+    border-color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.topic-card:hover {
+  border-color: var(--sc-accent-tag-border);
+  transform: translateY(-2px);
+}
+
+.card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  position: relative;
+  z-index: 2;
+}
+
+.card-top-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.action-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--sc-font);
+  font-size: 0.68rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+
+.sim-chip {
+  background: var(--sc-accent-tag-bg);
+  border: 1px solid var(--sc-accent-tag-border);
+  color: var(--sc-accent-tag-text);
+}
+
+.sim-chip:hover {
+  background: var(--sc-accent);
+  color: #ffffff;
+}
+
+.draw-chip {
+  background: rgba(251, 146, 60, 0.08);
+  border: 1px solid rgba(251, 146, 60, 0.2);
+  color: #fb923c;
+}
+
+.draw-chip:hover {
+  background: #fb923c;
+  color: #0d0d12;
+}
+
+.topic-checkbox {
+  position: relative;
+  display: inline-flex;
+  cursor: pointer;
+}
+
+.topic-checkbox input {
+  position: absolute;
+  opacity: 0;
+  width: 1.4rem;
+  height: 1.4rem;
+  margin: 0;
+  cursor: pointer;
+}
+
+.checkbox-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: var(--sc-radius-xs);
+  border: 1px solid var(--sc-border-strong);
+  background: var(--sc-surface-2);
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.topic-checkbox input:checked + .checkbox-mark {
+  background: var(--sc-accent);
+  border-color: var(--sc-accent);
+}
+
+.topic-checkbox input:checked + .checkbox-mark::after {
+  content: '\2713';
+  color: #ffffff;
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.card-link {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  text-decoration: none;
+}
+
+.card-link::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.card-icon-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  border-radius: var(--sc-radius-sm);
+  color: #ffffff;
+  font-size: 1.1rem;
+}
+
+.card-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--sc-text);
+}
+
+.card-summary {
+  color: var(--sc-text-muted);
+  font-size: 0.88rem;
+  line-height: 1.55;
+  flex: 1;
+}
+
+.card-tags {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.25rem;
+  gap: 0.4rem;
+}
+
+.difficulty-beginner {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.25);
+  color: #6ee7b7;
+}
+
+.difficulty-intermediate {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.25);
+  color: #fcd34d;
+}
+
+.difficulty-advanced {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.25);
+  color: #fca5a5;
 }
 </style>

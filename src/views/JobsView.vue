@@ -1,8 +1,10 @@
 <script setup lang="ts">
+import { ref, computed } from 'vue'
 import Card from 'primevue/card'
 import Tag from 'primevue/tag'
 import DataTable from 'primevue/datatable'
 import Column from 'primevue/column'
+import Select from 'primevue/select'
 import Accordion from 'primevue/accordion'
 import AccordionPanel from 'primevue/accordionpanel'
 import AccordionHeader from 'primevue/accordionheader'
@@ -41,6 +43,80 @@ const bigTechHiring = [
   { company: 'Anthropic', roles: 'Research Engineer, SWE, ML Engineer', level: 'Various', salary: '$200K-$500K+', focus: 'AI Safety, Claude Models, Infrastructure' },
   { company: 'OpenAI', roles: 'Research Engineer, SWE, Applied AI', level: 'Various', salary: '$200K-$500K+', focus: 'GPT models, Codex, Safety' },
 ]
+
+interface CompBand {
+  company: string
+  category: 'FAANG' | 'Product' | 'Fintech' | 'Startup' | 'Enterprise'
+  sde1: string
+  sde2: string
+  sde3: string
+}
+
+const levelDefinitions = [
+  {
+    level: 'SDE-1 / L3-L4',
+    years: '~0-2 yrs',
+    range: '$120K - $190K',
+    note: 'Entry level. New grads and early-career engineers, close mentorship, well-scoped tasks.',
+  },
+  {
+    level: 'SDE-2 / L5',
+    years: '~2-5 yrs',
+    range: '$160K - $290K',
+    note: 'The most common switch band. Owns features end-to-end with limited oversight.',
+  },
+  {
+    level: 'SDE-3+ / L6-L7',
+    years: '~5-8+ yrs',
+    range: '$220K - $450K+',
+    note: 'Senior / Staff. Cross-team scope, technical leadership, ambiguous problems.',
+  },
+]
+
+const compBands: CompBand[] = [
+  { company: 'Google', category: 'FAANG', sde1: '$155K - $195K', sde2: '$200K - $290K', sde3: '$280K - $450K+' },
+  { company: 'Meta', category: 'FAANG', sde1: '$160K - $200K', sde2: '$210K - $310K', sde3: '$300K - $480K+' },
+  { company: 'Amazon', category: 'FAANG', sde1: '$135K - $175K', sde2: '$175K - $260K', sde3: '$250K - $400K+' },
+  { company: 'Apple', category: 'FAANG', sde1: '$150K - $190K', sde2: '$195K - $280K', sde3: '$270K - $430K+' },
+  { company: 'Netflix', category: 'FAANG', sde1: '$170K - $210K', sde2: '$220K - $320K', sde3: '$320K - $500K+' },
+  { company: 'Microsoft', category: 'Enterprise', sde1: '$130K - $170K', sde2: '$170K - $250K', sde3: '$240K - $400K+' },
+  { company: 'Nvidia', category: 'Product', sde1: '$150K - $190K', sde2: '$195K - $280K', sde3: '$270K - $420K+' },
+  { company: 'Anthropic', category: 'Product', sde1: '$180K - $230K', sde2: '$230K - $340K', sde3: '$330K - $520K+' },
+  { company: 'OpenAI', category: 'Product', sde1: '$180K - $230K', sde2: '$230K - $340K', sde3: '$330K - $520K+' },
+  { company: 'Stripe', category: 'Fintech', sde1: '$150K - $190K', sde2: '$195K - $280K', sde3: '$270K - $420K+' },
+  { company: 'Airbnb', category: 'Product', sde1: '$150K - $190K', sde2: '$195K - $280K', sde3: '$260K - $410K+' },
+  { company: 'Uber', category: 'Product', sde1: '$140K - $180K', sde2: '$180K - $260K', sde3: '$250K - $390K+' },
+  { company: 'LinkedIn', category: 'Product', sde1: '$135K - $175K', sde2: '$175K - $255K', sde3: '$240K - $380K+' },
+  { company: 'Salesforce', category: 'Enterprise', sde1: '$120K - $160K', sde2: '$160K - $230K', sde3: '$220K - $350K+' },
+  { company: 'Adobe', category: 'Enterprise', sde1: '$120K - $160K', sde2: '$160K - $225K', sde3: '$215K - $340K+' },
+  { company: 'Oracle', category: 'Enterprise', sde1: '$110K - $150K', sde2: '$150K - $210K', sde3: '$200K - $320K+' },
+  { company: 'IBM', category: 'Enterprise', sde1: '$100K - $135K', sde2: '$135K - $185K', sde3: '$180K - $280K+' },
+  { company: 'Databricks', category: 'Startup', sde1: '$160K - $200K', sde2: '$210K - $300K', sde3: '$290K - $460K+' },
+  { company: 'Snowflake', category: 'Startup', sde1: '$155K - $195K', sde2: '$200K - $290K', sde3: '$280K - $440K+' },
+  { company: 'Palantir', category: 'Product', sde1: '$140K - $180K', sde2: '$180K - $260K', sde3: '$250K - $390K+' },
+  { company: 'Coinbase', category: 'Fintech', sde1: '$150K - $190K', sde2: '$195K - $280K', sde3: '$270K - $420K+' },
+  { company: 'Block (Square)', category: 'Fintech', sde1: '$145K - $185K', sde2: '$190K - $270K', sde3: '$260K - $400K+' },
+  { company: 'DoorDash', category: 'Startup', sde1: '$135K - $175K', sde2: '$175K - $250K', sde3: '$240K - $370K+' },
+  { company: 'ServiceNow', category: 'Enterprise', sde1: '$125K - $165K', sde2: '$165K - $235K', sde3: '$225K - $350K+' },
+  { company: 'Datadog', category: 'Startup', sde1: '$140K - $180K', sde2: '$180K - $260K', sde3: '$250K - $390K+' },
+]
+
+const compCategories = ['All', 'FAANG', 'Product', 'Fintech', 'Startup', 'Enterprise']
+const selectedCompCategory = ref('All')
+
+const filteredCompBands = computed(() =>
+  selectedCompCategory.value === 'All'
+    ? compBands
+    : compBands.filter((c) => c.category === selectedCompCategory.value),
+)
+
+function getCategorySeverity(category: string): string {
+  if (category === 'FAANG') return 'danger'
+  if (category === 'Fintech') return 'success'
+  if (category === 'Startup') return 'warn'
+  if (category === 'Enterprise') return 'info'
+  return 'secondary'
+}
 
 const hotSkills = [
   { skill: 'AI/ML Engineering', demand: 'Very High', growth: '+85%', note: 'Every company building AI agents and copilots' },
@@ -95,6 +171,62 @@ function getTypeSeverity(type: string): string {
         </template>
       </Card>
     </div>
+
+    <div class="target-companies-cta">
+      <div>
+        <h2 style="margin: 0 0 0.35rem"><i class="pi pi-flag"></i> Job Hunt: Target Companies (India)</h2>
+        <p style="margin: 0">
+          SDE-1/2/3 compensation bands across FAANG, Product, Fintech, HFT, GCC, Enterprise, Startup, and
+          Services companies in India - filterable by category, location, and level.
+        </p>
+      </div>
+      <router-link to="/jobs/target-companies" class="p-button p-component target-companies-link">
+        Explore Target Companies <i class="pi pi-arrow-right"></i>
+      </router-link>
+    </div>
+
+    <h2 style="margin: 2rem 0 1rem">
+      <i class="pi pi-wallet"></i> Compensation Bands by Level (US)
+      <Tag value="Editorial estimates" severity="warn" style="margin-left: 0.5rem; vertical-align: middle" />
+    </h2>
+    <p class="comp-disclaimer">
+      These ranges are editorial estimates compiled from public sources (levels.fyi, Blind, company career
+      pages) as of 2026 - not scraped real offer reports. Actual comp varies heavily by location, negotiation,
+      equity refreshers, and market conditions. Treat these as a starting point for research, not a quote.
+    </p>
+
+    <div class="level-cards">
+      <Card v-for="lvl in levelDefinitions" :key="lvl.level" class="level-card">
+        <template #title>{{ lvl.level }}</template>
+        <template #subtitle>{{ lvl.years }}</template>
+        <template #content>
+          <p class="level-range">{{ lvl.range }}</p>
+          <p class="level-note">{{ lvl.note }}</p>
+        </template>
+      </Card>
+    </div>
+
+    <div class="comp-filter-row">
+      <label for="comp-category">Filter by category:</label>
+      <Select
+        id="comp-category"
+        v-model="selectedCompCategory"
+        :options="compCategories"
+        style="min-width: 180px"
+      />
+    </div>
+
+    <DataTable :value="filteredCompBands" stripedRows paginator :rows="10" size="small" sortField="company" :sortOrder="1">
+      <Column field="company" header="Company" sortable style="min-width: 160px" />
+      <Column field="category" header="Category" sortable style="min-width: 130px">
+        <template #body="{ data }">
+          <Tag :value="data.category" :severity="getCategorySeverity(data.category) as any" />
+        </template>
+      </Column>
+      <Column field="sde1" header="SDE-1" sortable />
+      <Column field="sde2" header="SDE-2" sortable />
+      <Column field="sde3" header="SDE-3+" sortable />
+    </DataTable>
 
     <h2 style="margin: 2rem 0 1rem">Hottest Skills in Demand (2026)</h2>
     <DataTable :value="hotSkills" stripedRows>
@@ -154,6 +286,64 @@ function getTypeSeverity(type: string): string {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 1rem;
+}
+
+.target-companies-cta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  border: 1px solid var(--p-content-border-color, #334155);
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  margin: 2rem 0 1.5rem;
+}
+
+.target-companies-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--p-primary-color);
+  color: var(--p-primary-contrast-color, #fff);
+  border-radius: 6px;
+  padding: 0.6rem 1.1rem;
+  text-decoration: none;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.comp-disclaimer {
+  font-size: 0.85rem;
+  color: var(--p-text-muted-color, #94a3b8);
+  margin-bottom: 1rem;
+  max-width: 70ch;
+}
+
+.level-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.level-range {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #16a34a;
+  margin-bottom: 0.4rem;
+}
+
+.level-note {
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.comp-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
 }
 
 .company-detail p {

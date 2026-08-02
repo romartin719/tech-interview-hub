@@ -1,3 +1,4 @@
+import './firebase'
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import PrimeVue from 'primevue/config'
@@ -7,6 +8,8 @@ import 'primeicons/primeicons.css'
 import App from './App.vue'
 import router from './router'
 import './assets/main.css'
+import './assets/theme.css'
+import '@vue-flow/core/dist/style.css'
 
 const app = createApp(App)
 
